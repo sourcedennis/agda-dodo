@@ -1,0 +1,3 @@
+name: dodo
+include: src
+depend: standard-library-1.7.1
