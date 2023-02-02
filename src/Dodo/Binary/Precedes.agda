@@ -5,7 +5,9 @@ module Dodo.Binary.Precedes where
 -- Stdlib imports
 open import Level using (Level; _⊔_)
 open import Data.Product using (_×_; _,_)
+open import Function using (id)
 open import Relation.Nullary using (¬_)
+open import Relation.Nullary.Negation using (contraposition)
 open import Relation.Unary using (Pred)
 open import Relation.Binary using (REL; Rel)
 open import Relation.Binary.Construct.Closure.Transitive using (TransClosure; [_]; _∷_)
@@ -14,12 +16,18 @@ open import Dodo.Binary.Transitive
 open import Dodo.Binary.Immediate
 
 
+private
+  variable
+    a ℓ₁ ℓ₂ : Level
+    A : Set a
+    
+
 -- # Definitions #
 
 -- `¬ P x` before `¬ P y`
 -- `P x`   before `¬ P y`
 -- `P x`   before `P y`
-⊤-Precedes-⊥ : {a ℓ₁ ℓ₂ : Level} {A : Set a} → Pred A ℓ₁ → Rel A ℓ₂ → Set _
+⊤-Precedes-⊥ : REL (Pred A ℓ₁) (Rel A ℓ₂) _
 ⊤-Precedes-⊥ P R = ∀ {x y} → R x y → (P y → P x)
 
 -- We could generalize `⊤-Precedes-⊥` to `Precedes` below:
@@ -30,29 +38,22 @@ open import Dodo.Binary.Immediate
 -- However, this is semantically a bit cumbersome, as P and Q are /not/ mutually exclusive.
 -- Which means both P and Q may hold for an element.
 
-
--- # Helpers #
-
-private
-  identity : {a : Level} → {A : Set a} → A → A
-  identity x = x
-  
-  contrapositive : ∀ {a b : Level} {A : Set a} {B : Set b}
-    → ( A → B ) → ( ¬ B → ¬ A )
-  contrapositive f ¬b a = ¬b (f a)
-
-
 -- # Operations #
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} (R : Rel A ℓ₂) where
-
-  ⊤prec⊥-invert : ⊤-Precedes-⊥ P R → {x y : A} → R x y → ¬ P x → ¬ P y
-  ⊤prec⊥-invert ⊤prec⊥ Rxy ¬Px Py = contrapositive ¬Px identity (⊤prec⊥ Rxy Py)
+⊤prec⊥-invert : {P : Pred A ℓ₁}
+  → (R : Rel A ℓ₂)
+  → ⊤-Precedes-⊥ P R
+  → {x y : A}
+  → R x y
+  → ¬ P x
+    ----------------
+  → ¬ P y
+⊤prec⊥-invert _ ⊤prec⊥ Rxy ¬Px Py = contraposition ¬Px id (⊤prec⊥ Rxy Py)
 
 
 -- # Properties #
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {R : Rel A ℓ₂} where
+module _ {P : Pred A ℓ₁} {R : Rel A ℓ₂} where
 
   ⊤prec⊥-⁺ : ⊤-Precedes-⊥ P R → ⊤-Precedes-⊥ P (TransClosure R)
   ⊤prec⊥-⁺ Pprec¬P [ x∼y ]      Py = Pprec¬P x∼y Py

@@ -27,10 +27,15 @@ open import Dodo.Binary.Filter
 open import Dodo.Binary.Domain
 
 
+private
+  variable
+    a ℓ ℓ₁ ℓ₂ : Level
+    A : Set a
+
 -- # Definitions #
 
 -- | The immediate relation over the given (order) relation
-immediate : ∀ {a ℓ : Level} {A : Set a}
+immediate : {A : Set a}
   → Rel A ℓ
     -------------
   → Rel A (a ⊔ ℓ)
@@ -40,7 +45,7 @@ immediate r x y = r x y × ¬ (∃[ z ] r x z × TransClosure r z y)
 -- which is identical to this one when r is Transitive
 
 
-Immediate : ∀ {a ℓ : Level} {A : Set a}
+Immediate : {A : Set a}
   → Rel A ℓ
   → Set (a ⊔ ℓ)
 -- For some reason, x and y have to be /explicit/. Otherwise, Agda complains about some
@@ -50,13 +55,13 @@ Immediate {A = A} r = ∀ (x y : A) → r x y → ¬ (∃[ z ] r x z × TransClo
 
 -- # Operations #
 
-imm-flip : ∀ {a ℓ : Level} {A : Set a}
-  → {R : Rel A ℓ} {x y : A}
+imm-flip :
+    {R : Rel A ℓ} {x y : A}
   → immediate R x y
   → immediate (flip R) y x
 imm-flip {R = R} {x} {y} (Rxy , ¬∃z) = (Rxy , lemma)
   where
-  ⁺-invert : {a ℓ : Level} {A : Set a} {R : Rel A ℓ} {x y : A}
+  ⁺-invert : {R : Rel A ℓ} {x y : A}
     → {z : A} → R x z → TransClosure R z y
     → ∃[ q ] (TransClosure R x q × R q y)
   ⁺-invert {z = z} Rxz [ Rzy ] = (z , [ Rxz ] , Rzy)
@@ -71,7 +76,7 @@ imm-flip {R = R} {x} {y} (Rxy , ¬∃z) = (Rxy , lemma)
 
 -- # Properties #
 
-module _ {a ℓ : Level} {A : Set a} {R : Rel A ℓ} where
+module _ {R : Rel A ℓ} where
 
   imm-imm : Immediate (immediate R)
   imm-imm _ _ (Rxy , ¬∃z) (z , (Rxz , ¬∃w) , [immR]⁺xy) = ¬∃z (z , Rxz , ⁺-map _ proj₁ [immR]⁺xy)
@@ -81,7 +86,7 @@ module _ {a ℓ : Level} {A : Set a} {R : Rel A ℓ} where
   imm-⊆₂ = ⊆: λ{_ _ → proj₁}
 
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂} where
+module _ {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂} where
 
   imm-uniqueˡ : Trichotomous _≈_ _<_ → {z : A} → Unique₁ _≈_ λ{τ → immediate _<_ τ z}
   imm-uniqueˡ triR {z} {x} {y} (Rxz , ¬∃y) (Ryz , ¬∃x) with triR x y
@@ -96,7 +101,7 @@ module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {_≈_ : Rel A ℓ₁} {_<_ : Rel
   ... | tri> ¬Ryz y≈z  Rzy = ⊥-elim (¬∃z (z , Rxz , [ Rzy ]))
   
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {≈ : Rel A ℓ₁} {< : Rel A ℓ₂} where
+module _ {≈ : Rel A ℓ₁} {< : Rel A ℓ₂} where
 
   -- immediate < x y → immediate < x z → y ≈ z
   imm-func : IsStrictTotalOrder ≈ < → Functional ≈ (immediate <)
@@ -107,7 +112,7 @@ module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {≈ : Rel A ℓ₁} {< : Rel A �
   ... | tri> _     _     y₂<y₁ = ⊥-elim (¬∃z[x<z×z<y₁] (y₂ , x<y₂ , [ y₂<y₁ ]))
 
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {R : Rel A ℓ₂} where
+module _ {P : Pred A ℓ₁} {R : Rel A ℓ₂} where
 
   imm-filter-⊆₂ : filter-rel P (immediate R) ⊆₂ immediate (filter-rel P R)
   imm-filter-⊆₂ = ⊆: lemma
@@ -119,7 +124,7 @@ module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {R : Rel A �
       ¬∃z' (with-pred z Pz , Rxz , fR⁺zy) = ¬∃z (z , Rxz , ⁺-strip-filter fR⁺zy)
       
 
-module _ {a ℓ : Level} {A : Set a} {R : Rel A ℓ} where
+module _ {R : Rel A ℓ} where
 
   immediate⁺ : Immediate R → R ⇔₂ immediate (TransClosure R)
   immediate⁺ immR = ⇔: ⊆-proof ⊇-proof

@@ -22,12 +22,17 @@ open import Dodo.Unary.Intersection
 open import Dodo.Unary.Union
 
 
+private
+  variable
+    a ℓ ℓ₁ ℓ₂ : Level
+    A : Set a
+
 -- # Definitions
 
 -- | Identity relation over some set
 --
 -- Iff `P x` holds then `⦗ P ⦘ x x` holds.
-⦗_⦘ : ∀ {a ℓ : Level} {A : Set a}
+⦗_⦘ : {A : Set a}
   → Pred A ℓ
     -------------
   → Rel A (a ⊔ ℓ)
@@ -36,21 +41,19 @@ open import Dodo.Unary.Union
 
 -- # Properties
 
-module _ {a ℓ : Level} {A : Set a} {p : Pred A ℓ} where
+⦗⦘-sym : {p : Pred A ℓ} → Symmetric ⦗ p ⦘
+⦗⦘-sym (refl , px) = (refl , px)
 
-  ⦗⦘-sym : Symmetric ⦗ p ⦘
-  ⦗⦘-sym (refl , px) = (refl , px)
+⦗⦘-trans : {p : Pred A ℓ} → Transitive ⦗ p ⦘
+⦗⦘-trans (refl , pi) (refl , _) = (refl , pi)
 
-  ⦗⦘-trans : Transitive ⦗ p ⦘
-  ⦗⦘-trans (refl , pi) (refl , _) = (refl , pi)
-
-  ⦗⦘-flip : ⦗ p ⦘ ⇔₂ flip ⦗ p ⦘
-  ⦗⦘-flip = ⇔: (λ{_ _ → ⦗⦘-sym}) (λ{_ _ → ⦗⦘-sym})
+⦗⦘-flip : {p : Pred A ℓ} → ⦗ p ⦘ ⇔₂ flip ⦗ p ⦘
+⦗⦘-flip = ⇔: (λ{_ _ → ⦗⦘-sym}) (λ{_ _ → ⦗⦘-sym})
 
 
 -- # Operations
 
-module _ {a ℓ : Level} {A : Set a} {p : Pred A ℓ} where
+module _ {p : Pred A ℓ₁} where
 
   ⦗⦘-combine-⨾ : ⦗ p ⦘ ⨾ ⦗ p ⦘ ⇔₂ ⦗ p ⦘
   ⦗⦘-combine-⨾ = ⇔: ⊆-proof ⊇-proof
@@ -61,7 +64,7 @@ module _ {a ℓ : Level} {A : Set a} {p : Pred A ℓ} where
     ⊇-proof x _ (refl , Px) = (refl , Px) ⨾[ _ ]⨾ (refl , Px)
 
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {p : Pred A ℓ₁} {q : Pred A ℓ₂} where
+module _ {p : Pred A ℓ₁} {q : Pred A ℓ₂} where
 
   ⦗⦘-lift-⊆₂ : p ⊆₁ q → ⦗ p ⦘ ⊆₂ ⦗ q ⦘
   ⦗⦘-lift-⊆₂ (⊆: p⊆q) = ⊆: lemma
@@ -76,7 +79,7 @@ module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {p : Pred A ℓ₁} {q : Pred A �
     lemma x px = proj₂ (⦗p⦘⊆⦗q⦘ x x (refl , px))
 
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {p : Pred A ℓ₁} {q : Pred A ℓ₂} where
+module _ {p : Pred A ℓ₁} {q : Pred A ℓ₂} where
 
   ⦗⦘-lift : p ⇔₁ q → ⦗ p ⦘ ⇔₂ ⦗ q ⦘
   ⦗⦘-lift = ⇔₂-compose-⇔₁ ⦗⦘-lift-⊆₂ ⦗⦘-lift-⊆₂

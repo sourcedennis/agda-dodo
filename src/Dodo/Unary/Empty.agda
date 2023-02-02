@@ -9,13 +9,24 @@ open import Relation.Nullary using (¬_)
 open import Relation.Unary using (Pred)
 
 
+private
+  variable
+    a ℓ : Level
+    A : Set a
+    
+
 -- # Definitions
 
-Empty₁ : ∀ {a ℓ : Level} {A : Set a} → Pred A ℓ → Set (a ⊔ ℓ)
+-- | The predicate is not satisfied by any element.
+Empty₁ : {A : Set a} → Pred A ℓ → Set (a ⊔ ℓ)
 Empty₁ {A = A} P = ∀ (x : A) → ¬ P x
 
-NonEmpty₁ : ∀ {a ℓ : Level} {A : Set a} → Pred A ℓ → Set (a ⊔ ℓ)
+-- | The predicate is satisfied by at least one element.
+NonEmpty₁ : {A : Set a} → Pred A ℓ → Set (a ⊔ ℓ)
 NonEmpty₁ P = ∃[ x ] P x
 
-¬₁_ : ∀ {a ℓ : Level} {A : Set a} → Pred A ℓ → Pred A ℓ
+-- | Predicate negation
+--
+-- For any `x`, `x` satisfies `¬₁ P` iff it does not satisfy `P`.
+¬₁_ : Pred A ℓ → Pred A ℓ
 ¬₁_ P x = ¬ P x

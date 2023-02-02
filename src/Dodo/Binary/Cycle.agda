@@ -19,14 +19,19 @@ open import Dodo.Unary.Dec
 open import Dodo.Binary.Transitive
 
 
+private
+  variable
+    a ℓ : Level
+    A : Set a
+
 -- # Definitions
 
 -- | The given relation, with proofs that neither element equals `z`.
-ExcludeRel : {a ℓ : Level} {A : Set a} → (R : Rel A ℓ) → (z : A) → Rel A (a ⊔ ℓ)
+ExcludeRel : {A : Set a} (R : Rel A ℓ) → (z : A) → Rel A (a ⊔ ℓ)
 ExcludeRel R z x y = R x y × x ≢ z × y ≢ z
 
 -- | A cycle of R which passes through `z` /exactly once/.
-data PassCycle {a ℓ : Level} {A : Set a} (R : Rel A ℓ) (z : A) : Set (a ⊔ ℓ) where
+data PassCycle {A : Set a} (R : Rel A ℓ) (z : A) : Set (a ⊔ ℓ) where
   cycle₁ : R z z → PassCycle R z
   cycle₂ : {x : A} → x ≢ z → R z x → R x z → PassCycle R z
   cycleₙ : {x y : A} → R z x → TransClosure (ExcludeRel R z) x y → R y z → PassCycle R z
@@ -39,8 +44,8 @@ data PassCycle {a ℓ : Level} {A : Set a} (R : Rel A ℓ) (z : A) : Set (a ⊔ 
 --
 -- Note that if the original cycle passes `y` /more than once/, then only one
 -- cycle of the multi-cycle through `y` may be taken.
-divert-cycle : {a ℓ : Level} {A : Set a}
-  → {R : Rel A ℓ}
+divert-cycle :
+    {R : Rel A ℓ}
   → {x : A}
   → TransClosure R x x
   → {y : A}
@@ -72,7 +77,10 @@ divert-cycle {A = A} {R = R} {x} ( Rxw ∷ R⁺wx ) {y} eq-dec = lemma Rxw R⁺w
   lemma-incl₀ {x} Ryx (_∷_ {x} {z} Rxz R⁺zy) | no x≢y | no  z≢y  = lemma-incl Ryx [ Rxz , x≢y , z≢y ] R⁺zy
 
   -- Chain that does /not/ (yet) pass through `y`.
-  lemma-excl : {z : A} → TransClosure (ExcludeRel R y) x z → TransClosure R z x → PassCycle R y ⊎ TransClosure (ExcludeRel R y) x x
+  lemma-excl : {z : A}
+    → TransClosure (ExcludeRel R y) x z
+    → TransClosure R z x
+    → PassCycle R y ⊎ TransClosure (ExcludeRel R y) x x
   lemma-excl R⁺xz [ Rzx ] =
     let z≢y = ⁺-lift-predʳ (proj₂ ∘ proj₂) R⁺xz
         x≢y = ⁺-lift-predˡ (proj₁ ∘ proj₂) R⁺xz

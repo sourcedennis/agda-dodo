@@ -6,7 +6,7 @@ module Dodo.Binary.SplittableOrder where
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl)
 open import Level using (Level; _⊔_)
-open import Function using (_∘_)
+open import Function using (_∘_; flip)
 open import Data.Empty using (⊥-elim)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; _,_; proj₁; proj₂; ∃-syntax)
@@ -23,18 +23,23 @@ open import Dodo.Binary.Transitive
 open import Dodo.Binary.Domain
 open import Dodo.Binary.Filter
 
-open import Function using (flip)
+
+private
+  variable
+    a ℓ ℓ₁ ℓ₂ : Level
+    A : Set a
+
 
 -- # Definitions #
 
--- For any `R x y` there exists a /path/ from `x` to `y`.
-SplittableOrder : {a ℓ : Level} {A : Set a} (R : Rel A ℓ) → Set (a ⊔ ℓ)
+-- | For any `R x y` there exists a /path/ from `x` to `y`.
+SplittableOrder : {A : Set a} → Rel A ℓ → Set (a ⊔ ℓ)
 SplittableOrder R = R ⇔₂ TransClosure (immediate R)
 
 
 -- # Properties #
 
-module _ {a ℓ : Level} {A : Set a} {R : Rel A ℓ} where
+module _ {R : Rel A ℓ} where
 
   splittable-trans : SplittableOrder R → Transitive R
   splittable-trans splitR Rij Rjk = 
@@ -55,7 +60,7 @@ module _ {a ℓ : Level} {A : Set a} {R : Rel A ℓ} where
 -- # Operations #
 
 -- Split the left-most element from the ordered relation chain
-splitˡ : ∀ {a ℓ : Level} {A : Set a} {R : Rel A ℓ}
+splitˡ : {R : Rel A ℓ}
   → SplittableOrder R
   → {x y : A}
   → R x y
@@ -67,7 +72,7 @@ splitˡ splitR Rxy with ⇔₂-apply-⊆₂ splitR Rxy
 
 
 -- Split the right-most element from the ordered relation chain
-splitʳ : ∀ {a ℓ : Level} {A : Set a} {R : Rel A ℓ}
+splitʳ : {R : Rel A ℓ}
   → SplittableOrder R
   → {x y : A}
   → R x y
@@ -83,23 +88,23 @@ splitʳ {A = A} {R = R} splitR Rxy = lemma (⇔₂-apply-⊆₂ splitR Rxy)
 
 
 -- Splits the given left-most element from the chain.
-unsplitˡ : ∀ {a ℓ₁ ℓ₂ : Level} {A : Set a} {_≈_ : Rel A ℓ₁} {R : Rel A ℓ₂}
+unsplitˡ : {_≈_ : Rel A ℓ₁} {R : Rel A ℓ₂}
   → Trichotomous _≈_ R
   → SplittableOrder R
   → {x y z : A}
   → R x z
   → immediate R x y
   → y ≈ z ⊎ R y z
-unsplitˡ triR splitR {x} {y} {z} Rxz immRxy with splitˡ splitR Rxz
-unsplitˡ triR splitR {x} {y} {z} Rxz immRxy | inj₁ immRxz = inj₁ (tri-immʳ triR immRxy immRxz)
-unsplitˡ triR splitR {x} {y} {z} Rxz immRxy | inj₂ (v , immRxv , Rvz) with triR y z
-unsplitˡ triR splitR {x} {y} {z} Rxz immRxy | inj₂ (v , immRxv , Rvz) | tri<  Ryz y≢z ¬Rzy = inj₂ Ryz
-unsplitˡ triR splitR {x} {y} {z} Rxz immRxy | inj₂ (v , immRxv , Rvz) | tri≈ ¬Ryz y≡z ¬Rzy = inj₁ y≡z
-unsplitˡ triR splitR {x} {y} {z} Rxz immRxy | inj₂ (v , immRxv , Rvz) | tri> ¬Ryz y≢z  Rzy = ⊥-elim (proj₂ immRxy (z , Rxz , [ Rzy ]))
+unsplitˡ triR splitR             Rxz immRxy with splitˡ splitR Rxz
+unsplitˡ triR splitR             Rxz immRxy | inj₁ immRxz = inj₁ (tri-immʳ triR immRxy immRxz)
+unsplitˡ triR splitR {_} {y} {z} Rxz immRxy | inj₂ (v , immRxv , Rvz) with triR y z
+unsplitˡ triR splitR             Rxz immRxy | inj₂ (v , immRxv , Rvz) | tri<  Ryz y≢z ¬Rzy = inj₂ Ryz
+unsplitˡ triR splitR             Rxz immRxy | inj₂ (v , immRxv , Rvz) | tri≈ ¬Ryz y≡z ¬Rzy = inj₁ y≡z
+unsplitˡ triR splitR {_} {_} {z} Rxz immRxy | inj₂ (v , immRxv , Rvz) | tri> ¬Ryz y≢z  Rzy = ⊥-elim (proj₂ immRxy (z , Rxz , [ Rzy ]))
 
 
 -- Splits the given right-most element from the chain.
-unsplitʳ : ∀ {a ℓ₁ ℓ₂ : Level} {A : Set a} {_≈_ : Rel A ℓ₁} {R : Rel A ℓ₂}
+unsplitʳ : {_≈_ : Rel A ℓ₁} {R : Rel A ℓ₂}
   → Trichotomous _≈_ R
   → SplittableOrder R
   → {x y z : A}
@@ -114,7 +119,7 @@ unsplitʳ triR splitR {x} {y} {z} Rxz iRyz | inj₂ (v , Rxv , iRvz) | tri≈ ¬
 unsplitʳ triR splitR {x} {y} {z} Rxz iRyz | inj₂ (v , Rxv , iRvz) | tri> ¬Rxy x≢y  Ryx = ⊥-elim (proj₂ iRyz (x , Ryx , [ Rxz ]))
 
 
-splittable-imm-udr : ∀ {a ℓ : Level} {A : Set a} {R : Rel A ℓ}
+splittable-imm-udr : {R : Rel A ℓ}
   → SplittableOrder R
   → udr R ⇔₁ udr (immediate R)
 splittable-imm-udr {R = R} splitR = ⇔: ⊆-proof ⊇-proof
@@ -131,7 +136,7 @@ splittable-imm-udr {R = R} splitR = ⇔: ⊆-proof ⊇-proof
 -- | If any value in the chain of R satisfies P, it remains splittable after lifting.
 --
 -- The chain is traversed /to the left/.
-filter-splittableˡ : ∀ {a ℓ : Level} {A : Set a} {R : Rel A ℓ}
+filter-splittableˡ : {R : Rel A ℓ}
   → SplittableOrder R
   → (P : Pred A ℓ)
   → (∀ {x y : A} → P y → R x y → P x)
@@ -177,7 +182,7 @@ filter-splittableˡ {A = A} {R = R} splitR P f = ⇔: ⊆-proof ⊇-proof
 -- | If any value in the chain of R satisfies P, it remains splittable after lifting.
 --
 -- The chain is traversed /to the right/.
-filter-splittableʳ : ∀ {a ℓ : Level} {A : Set a} {R : Rel A ℓ}
+filter-splittableʳ : {R : Rel A ℓ}
   → SplittableOrder R
   → (P : Pred A ℓ)
   → (∀ {x y : A} → P x → R x y → P y)

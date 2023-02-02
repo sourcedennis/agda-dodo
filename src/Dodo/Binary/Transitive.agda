@@ -19,14 +19,20 @@ open import Dodo.Binary.Equality
 open import Dodo.Binary.Domain
 
 
-⁺-flip : {a ℓ : Level} {A : Set a} → {R : Rel A ℓ}
+private
+  variable
+    a b ℓ ℓ₁ ℓ₂ : Level
+    A : Set a
+
+
+⁺-flip : {R : Rel A ℓ}
   → {x y : A}
   → TransClosure R x y
   → TransClosure (flip R) y x
 ⁺-flip [ x∼y ]      = [ x∼y ]
 ⁺-flip (x∼z ∷ z∼⁺y) = ⁺-flip z∼⁺y ∷ʳ x∼z
 
-⁺-map : {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b}
+⁺-map : {A : Set a} {B : Set b}
   → {R : Rel A ℓ₁} {Q : Rel B ℓ₂}
   → (f : A → B)
   → (map : ∀ {x y : A} → R x y → Q (f x) (f y))
@@ -36,7 +42,7 @@ open import Dodo.Binary.Domain
 ⁺-map _ map [ Rxy ] = [ map Rxy ]
 ⁺-map _ map ( Rxz ∷ R⁺zy ) = map Rxz ∷ ⁺-map _ map R⁺zy
 
-⁺-dom : ∀ {a ℓ : Level} {A : Set a} {R : Rel A ℓ}
+⁺-dom : {R : Rel A ℓ}
   → {x y : A}
   → TransClosure R x y
     ------------------
@@ -44,7 +50,7 @@ open import Dodo.Binary.Domain
 ⁺-dom {R = R} [ Rxy ] = take-dom R Rxy
 ⁺-dom {R = R} ( Rxz ∷ R⁺zy ) = take-dom R Rxz
 
-⁺-codom : ∀ {a ℓ : Level} {A : Set a} {R : Rel A ℓ}
+⁺-codom : {R : Rel A ℓ}
   → {x y : A}
   → TransClosure R x y
     ------------------
@@ -52,21 +58,21 @@ open import Dodo.Binary.Domain
 ⁺-codom {R = R} [ Rxy ] = take-codom R Rxy
 ⁺-codom {R = R} ( Rxz ∷ R⁺zy ) = ⁺-codom R⁺zy
 
-⁺-udrˡ : ∀ {a ℓ : Level} {A : Set a} {R : Rel A ℓ}
+⁺-udrˡ : {R : Rel A ℓ}
   → {x y : A}
   → TransClosure R x y
     ------------------
   → x ∈ udr R
 ⁺-udrˡ = inj₁ ∘ ⁺-dom
 
-⁺-udrʳ : ∀ {a ℓ : Level} {A : Set a} {R : Rel A ℓ}
+⁺-udrʳ : {R : Rel A ℓ}
   → {x y : A}
   → TransClosure R x y
     ------------------
   → y ∈ udr R
 ⁺-udrʳ = inj₂ ∘ ⁺-codom
 
-⁺-predʳ : {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {R : Rel A ℓ₂}
+⁺-predʳ : {P : Pred A ℓ₁} {R : Rel A ℓ₂}
   → (f : ∀ {x y : A} → P x → R x y → P y)
   → {x y : A}
   → TransClosure R x y
@@ -75,7 +81,7 @@ open import Dodo.Binary.Domain
 ⁺-predʳ f [ Rxy ]        Px = f Px Rxy
 ⁺-predʳ f ( Rxz ∷ R⁺zy ) Px = ⁺-predʳ f R⁺zy (f Px Rxz)
 
-⁺-predˡ : {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {R : Rel A ℓ₂}
+⁺-predˡ : {P : Pred A ℓ₁} {R : Rel A ℓ₂}
   → (f : ∀ {x y : A} → P y → R x y → P x)
   → {x y : A}
   → TransClosure R x y
@@ -84,7 +90,7 @@ open import Dodo.Binary.Domain
 ⁺-predˡ f [ Rxy ]        Px = f Px Rxy
 ⁺-predˡ f ( Rxz ∷ R⁺zy ) Px = f (⁺-predˡ f R⁺zy Px) Rxz
 
-⁺-lift-predʳ : {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {R : Rel A ℓ₂}
+⁺-lift-predʳ : {P : Pred A ℓ₁} {R : Rel A ℓ₂}
   → (f : ∀ {x y : A} → R x y → P y)
   → {x y : A}
   → TransClosure R x y
@@ -92,7 +98,7 @@ open import Dodo.Binary.Domain
 ⁺-lift-predʳ f [ Rxy ] = f Rxy
 ⁺-lift-predʳ f ( Rxz ∷ R⁺zy ) = ⁺-lift-predʳ f R⁺zy
 
-⁺-lift-predˡ : {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {R : Rel A ℓ₂}
+⁺-lift-predˡ : {P : Pred A ℓ₁} {R : Rel A ℓ₂}
   → (f : ∀ {x y : A} → R x y → P x)
   → {x y : A}
   → TransClosure R x y

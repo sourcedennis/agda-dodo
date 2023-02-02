@@ -11,33 +11,26 @@ open import Relation.Binary using (Symmetric)
 open import Dodo.Binary.Equality
 
 
+private
+  variable
+    a b ℓ₁ ℓ₂ : Level
+    A B : Set a
+
 -- # Operations
 
 -- ## Operations: ⊆₂
 
-module _ {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b}
-    {P : REL A B ℓ₁} {Q : REL A B ℓ₂} where
+flip-⊆₂ : {P : REL A B ℓ₁} {Q : REL A B ℓ₂} → P ⊆₂ Q → flip P ⊆₂ flip Q
+flip-⊆₂ (⊆: P⊆Q) = ⊆: (flip P⊆Q)
 
-  flip-⊆₂ : P ⊆₂ Q → flip P ⊆₂ flip Q
-  flip-⊆₂ (⊆: P⊆Q) = ⊆: (flip P⊆Q)
+flip-sym-⊆₂ : {P : Rel A ℓ₁} → Symmetric P → P ⊆₂ flip P
+flip-sym-⊆₂ symP = ⊆: (λ _ _ → symP)
 
-
-module _ {a ℓ₁ : Level} {A : Set a} {P : Rel A ℓ₁} where
-
-  flip-sym-⊆₂ : Symmetric P → P ⊆₂ flip P
-  flip-sym-⊆₂ symP = ⊆: (λ _ _ → symP)
-  
 
 -- ## Operations: ⇔₂
+ 
+flip-⇔₂ : {P : REL A B ℓ₁} {Q : REL A B ℓ₂} → P ⇔₂ Q → flip P ⇔₂ flip Q
+flip-⇔₂ = ⇔₂-compose flip-⊆₂ flip-⊆₂
 
-module _ {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b}
-    {P : REL A B ℓ₁} {Q : REL A B ℓ₂} where
-    
-  flip-⇔₂ : P ⇔₂ Q → flip P ⇔₂ flip Q
-  flip-⇔₂ = ⇔₂-compose flip-⊆₂ flip-⊆₂
-
-
-module _ {a ℓ₁ : Level} {A : Set a} {P : Rel A ℓ₁} where
-
-  flip-sym-⇔₂ : Symmetric P → P ⇔₂ flip P
-  flip-sym-⇔₂ symP = ⇔₂-intro (flip-sym-⊆₂ symP) (flip-sym-⊆₂ symP)
+flip-sym-⇔₂ : {P : Rel A ℓ₁} → Symmetric P → P ⇔₂ flip P
+flip-sym-⇔₂ symP = ⇔₂-intro (flip-sym-⊆₂ symP) (flip-sym-⊆₂ symP)

@@ -9,8 +9,15 @@ open import Relation.Binary using (Rel; Irreflexive)
 open import Dodo.Binary.Equality
 
 
-module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a}
-    {≈ : Rel A ℓ₁} {P : Rel A ℓ₂} {Q : Rel A ℓ₃} where
+private
+  variable
+    a ℓ₁ ℓ₂ ℓ₃ : Level
+    A : Set a
 
-  irreflexive-⊆₂ : Irreflexive ≈ Q → P ⊆₂ Q → Irreflexive ≈ P
-  irreflexive-⊆₂ irreflexiveQ P⊆Q x≈y Pxy = irreflexiveQ x≈y (⊆₂-apply P⊆Q Pxy)
+
+irreflexive-⊆₂ : {≈ : Rel A ℓ₁} {P : Rel A ℓ₂} {Q : Rel A ℓ₃}
+  → Irreflexive ≈ Q
+  → P ⊆₂ Q
+    ---------------
+  → Irreflexive ≈ P
+irreflexive-⊆₂ irreflexiveQ P⊆Q x≈y Pxy = irreflexiveQ x≈y (⊆₂-apply P⊆Q Pxy)

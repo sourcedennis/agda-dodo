@@ -15,10 +15,18 @@ open import Dodo.Binary.Domain
 open import Dodo.Binary.Composition
 
 
+private
+  variable
+    a b c ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level
+    A : Set a
+    B : Set b
+    C : Set c
+    
+
 infix 40 _×₂_
 
-_×₂_ : ∀ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b}
-  → Pred A ℓ₁
+_×₂_ :
+    Pred A ℓ₁
   → Pred B ℓ₂
     -----------------
   → REL A B (ℓ₁ ⊔ ℓ₂)
@@ -27,8 +35,7 @@ _×₂_ P Q x y = P x × Q y
 
 -- ## Operations: ×₂ ##
 
-module _ {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b}
-    {d : Pred A ℓ₁} {r : Pred B ℓ₂} where
+module _ {d : Pred A ℓ₁} {r : Pred B ℓ₂} where
 
   ×₂-dom : ∀ {x : A} {y : B} → ( d ×₂ r ) x y → d x
   ×₂-dom (dx , ry) = dx
@@ -40,8 +47,7 @@ module _ {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b}
   ×₂-flip (dx , ry) = (ry , dx)
   
 
-module _ {a b ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b}
-    {d₁ : Pred A ℓ₁} {d₂ : Pred A ℓ₂} {r₁ : Pred B ℓ₃} {r₂ : Pred B ℓ₄} where
+module _ {d₁ : Pred A ℓ₁} {d₂ : Pred A ℓ₂} {r₁ : Pred B ℓ₃} {r₂ : Pred B ℓ₄} where
     
   ×₂-lift : ( d₁ ⊆₁ d₂ ) → ( r₁ ⊆₁ r₂ ) → d₁ ×₂ r₁ ⊆₂ d₂ ×₂ r₂
   ×₂-lift f g = ⊆: lemma
@@ -50,8 +56,7 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b}
     lemma x y (d₁x , r₁y) = (⊆₁-apply f d₁x , ⊆₁-apply g r₁y)
 
 
-module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {R : REL A B ℓ₁}
-    {d : Pred A ℓ₂} {r : Pred B ℓ₃} where
+module _ {R : REL A B ℓ₁} {d : Pred A ℓ₂} {r : Pred B ℓ₃} where
 
   ×₂-applyˡ : R ⊆₂ ( d ×₂ r ) → {x : A} {y : B} → R x y → d x
   ×₂-applyˡ R⊆₂d×r Rxy = ×₂-dom {d = d} {r = r} (⊆₂-apply R⊆₂d×r Rxy)
@@ -66,8 +71,7 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {R : REL A B
   ×₂-apply-codom R⊆d×r (x , Rxy) = ×₂-applyʳ R⊆d×r Rxy
 
 
-module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
-    {Q : REL A B ℓ₁} {d : A → Set ℓ₂} {r : B → Set ℓ₃} where
+module _ {Q : REL A B ℓ₁} {d : A → Set ℓ₂} {r : B → Set ℓ₃} where
 
   ×₂-flip-⊆₂ : Q ⊆₂ d ×₂ r → flip Q ⊆₂ r ×₂ d
   ×₂-flip-⊆₂ (⊆: Q⊆×) = ⊆: lemma
@@ -77,8 +81,7 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
     ... | (dy , rx) = (rx , dy)
 
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a}
-    {R : Rel A ℓ₁} {P : Pred A ℓ₂} where
+module _ {R : Rel A ℓ₁} {P : Pred A ℓ₂} where
     
   ×₂-lift-udr :
       udr R ⊆₁ P
@@ -90,8 +93,7 @@ module _ {a ℓ₁ ℓ₂ : Level} {A : Set a}
     lemma x y Rxy = ⊆₁-apply udrR⊆P (take-udrˡ R Rxy) , ⊆₁-apply udrR⊆P (take-udrʳ R Rxy)
 
 
-module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
-    {R : REL A B ℓ₁} {P : Pred A ℓ₂} {Q : Pred B ℓ₃} where
+module _ {R : REL A B ℓ₁} {P : Pred A ℓ₂} {Q : Pred B ℓ₃} where
 
   ×₂-lift-dom :
       dom R ⊆₁ P
@@ -104,8 +106,7 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
     lemma x y Rxy = (dom⊆P x (take-dom R Rxy) , codom⊆Q y (take-codom R Rxy))
   
 
-module _ {a b ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b}
-    {Q : REL A B ℓ₁} {d₁ : Pred A ℓ₂} {d₂ : Pred A ℓ₃} {r : B → Set ℓ₄} where
+module _ {Q : REL A B ℓ₁} {d₁ : Pred A ℓ₂} {d₂ : Pred A ℓ₃} {r : B → Set ℓ₄} where
 
   ×₂-⊆ˡ :
       d₁ ⊆₁ d₂
@@ -117,8 +118,7 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b}
     lemma x y = map₁ (⊆₁-apply d₁⊆d₂)
 
 
-module _ {a b ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b}
-    {Q : REL A B ℓ₁} {d : Pred A ℓ₂} {r₁ : Pred B ℓ₃} {r₂ : Pred B ℓ₄} where
+module _ {Q : REL A B ℓ₁} {d : Pred A ℓ₂} {r₁ : Pred B ℓ₃} {r₂ : Pred B ℓ₄} where
 
   ×₂-⊆ʳ :
       r₁ ⊆₁ r₂
@@ -130,8 +130,7 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b}
     lemma x y = map₂ (⊆₁-apply r₁⊆r₂)
 
 
-module _ {a b c ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b} {C : Set c}
-    {d₁ : Pred A ℓ₁} {r₁ : Pred B ℓ₂} {d₂ : Pred B ℓ₃} {r₂ : Pred C ℓ₄} where
+module _ {d₁ : Pred A ℓ₁} {r₁ : Pred B ℓ₂} {d₂ : Pred B ℓ₃} {r₂ : Pred C ℓ₄} where
 
   ×₂-combine-⨾ : ( d₁ ×₂ r₁ ) ⨾ ( d₂ ×₂ r₂ ) ⊆₂ d₁ ×₂ r₂
   ×₂-combine-⨾ = ⊆: lemma

@@ -10,9 +10,15 @@ open import Dodo.Binary.Empty using (¬₂_)
 open import Dodo.Binary.Intersection using (_∩₂_)
 
 
+private
+  variable
+    a ℓ₁ ℓ₂ : Level
+    A B : Set a
+
+
 -- # Definitions
 
 infixl 30 _\₂_
 
-_\₂_ : {a b ℓ₀ ℓ₁ : Level} {A : Set a} {B : Set b} → REL A B ℓ₀ → REL A B ℓ₁ → REL A B (ℓ₀ ⊔ ℓ₁)
-_\₂_ R Q = R ∩₂ (¬₂ Q)
+_\₂_ : REL A B ℓ₁ → REL A B ℓ₂ → REL A B (ℓ₁ ⊔ ℓ₂)
+R \₂ Q = R ∩₂ (¬₂ Q)

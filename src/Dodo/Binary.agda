@@ -2,6 +2,9 @@
 
 module Dodo.Binary where
 
+
+open import Dodo.Binary.Definition public
+
 open import Dodo.Binary.Acyclic public
 open import Dodo.Binary.Composition public
 open import Dodo.Binary.Cycle public

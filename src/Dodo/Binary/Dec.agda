@@ -8,6 +8,10 @@ open import Relation.Nullary using (Dec)
 open import Relation.Binary using (REL)
 
 
-DecRel : {a b ℓ : Level} {A : Set a} {B : Set b}
-  → REL A B ℓ → Set (a ⊔ b ⊔ ℓ)
+private
+  variable
+    a b ℓ : Level
+
+
+DecRel : {A : Set a} {B : Set b} → REL A B ℓ → Set (a ⊔ b ⊔ ℓ)
 DecRel R = ∀ x y → Dec (R x y)

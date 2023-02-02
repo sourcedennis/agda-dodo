@@ -13,6 +13,12 @@ open import Relation.Binary using (Transitive; Symmetric)
 open import Dodo.Binary.Equality
 
 
+private
+  variable
+    a b c ℓ₁ ℓ₂ ℓ₃ : Level
+    A B C D : Set a
+
+
 -- # Definitions
 
 infixl 10 _⨾_ ⨾:
@@ -48,7 +54,7 @@ infixl 10 _⨾_ ⨾:
 --
 -- Which is syntactically even less desirable. Hence, in the definition below, `z` is represented
 -- explicitly.
-data _⨾_ {a b c ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b} {C : Set c} (L : REL A B ℓ₁) (R : REL B C ℓ₂)
+data _⨾_ {A : Set a} {B : Set b} {C : Set c} (L : REL A B ℓ₁) (R : REL B C ℓ₂)
     (i : A) (j : C) : Set (a ⊔ b ⊔ c ⊔ ℓ₁ ⊔ ℓ₂) where
   ⨾: : (k : B) → L i k → R k j → (L ⨾ R) i j
 
@@ -57,8 +63,7 @@ syntax ⨾: k Pik Qkj = Pik ⨾[ k ]⨾ Qkj
 
 -- # Properties
 
-module _ {a b c d ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
-    {P : REL A B ℓ₁} {Q : REL B C ℓ₂} {R : REL C D ℓ₃} where
+module _ {P : REL A B ℓ₁} {Q : REL B C ℓ₂} {R : REL C D ℓ₃} where
 
   -- | Composition of binary relations is associative.
   ⨾-assoc : (P ⨾ Q) ⨾ R ⇔₂ P ⨾ (Q ⨾ R)
@@ -70,7 +75,7 @@ module _ {a b c d ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {C : Set
     ⊇-proof _ _ (Pxb ⨾[ b ]⨾ (Qbc ⨾[ c ]⨾ Rcy)) = (Pxb ⨾[ b ]⨾ Qbc) ⨾[ c ]⨾ Rcy
 
 
-module _ {a ℓ : Level} {A : Set a} {R : Rel A ℓ} where
+module _ {R : Rel A ℓ₁} where
 
   -- | The composition of a transitive relation with itself is a subset of itself.
   ⨾-trans-⊆₂ : Transitive R → (R ⨾ R) ⊆₂ R
@@ -82,8 +87,7 @@ module _ {a ℓ : Level} {A : Set a} {R : Rel A ℓ} where
 
 -- # Operations
 
-module _ {a b c ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {C : Set c}
-    {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL B C ℓ₃} where
+module _ {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL B C ℓ₃} where
 
   ⨾-substˡ-⊆₂ : P ⊆₂ Q → (P ⨾ R) ⊆₂ (Q ⨾ R)
   ⨾-substˡ-⊆₂ (⊆: P⊆Q) = ⊆: ⊆-proof
@@ -92,15 +96,13 @@ module _ {a b c ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {C : Set c
     ⊆-proof x y (Pxz ⨾[ z ]⨾ Rzy) = P⊆Q x z Pxz ⨾[ z ]⨾ Rzy
 
 
-module _ {a b c ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {C : Set c}
-    {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL B C ℓ₃} where
+module _ {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL B C ℓ₃} where
     
   ⨾-substˡ : P ⇔₂ Q → (P ⨾ R) ⇔₂ (Q ⨾ R)
   ⨾-substˡ = ⇔₂-compose ⨾-substˡ-⊆₂ ⨾-substˡ-⊆₂
 
 
-module _ {a b c ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {C : Set c}
-    {P : REL B C ℓ₁} {Q : REL B C ℓ₂} {R : REL A B ℓ₃} where
+module _ {P : REL B C ℓ₁} {Q : REL B C ℓ₂} {R : REL A B ℓ₃} where
     
   ⨾-substʳ-⊆₂ : P ⊆₂ Q → (R ⨾ P) ⊆₂ (R ⨾ Q)
   ⨾-substʳ-⊆₂ (⊆: P⊆Q) = ⊆: ⊆-proof
@@ -109,15 +111,13 @@ module _ {a b c ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {C : Set c
     ⊆-proof x y (Rxz ⨾[ z ]⨾ Pzy) = Rxz ⨾[ z ]⨾ P⊆Q z y Pzy
 
 
-module _ {a b c ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {C : Set c}
-    {P : REL B C ℓ₁} {Q : REL B C ℓ₂} {R : REL A B ℓ₃} where
+module _ {P : REL B C ℓ₁} {Q : REL B C ℓ₂} {R : REL A B ℓ₃} where
     
   ⨾-substʳ : P ⇔₂ Q → (R ⨾ P) ⇔₂ (R ⨾ Q)
   ⨾-substʳ = ⇔₂-compose ⨾-substʳ-⊆₂ ⨾-substʳ-⊆₂
 
 
-module _ {a b c ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b} {C : Set c}
-    {P : REL A B ℓ₁} {Q : REL B C ℓ₂} where
+module _ {P : REL A B ℓ₁} {Q : REL B C ℓ₂} where
 
   -- | Expanded definition of flipping the composition of two relations.
   ⨾-flip : flip (P ⨾ Q) ⇔₂ flip Q ⨾ flip P

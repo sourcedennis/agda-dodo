@@ -11,8 +11,13 @@ open import Dodo.Unary.Empty
 open import Dodo.Unary.Intersection
 
 
+private
+  variable
+    a ℓ₁ ℓ₂ : Level
+    A : Set a
+
+
 -- # Definitions
 
-Disjoint₁ : ∀ {a ℓ₁ ℓ₂ : Level} {A : Set a}
-  → Pred A ℓ₁ → Pred A ℓ₂ → Set _
+Disjoint₁ : Pred A ℓ₁ → Pred A ℓ₂ → Set _
 Disjoint₁ P Q = Empty₁ (P ∩₁ Q)

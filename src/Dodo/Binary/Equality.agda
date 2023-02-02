@@ -14,6 +14,13 @@ open import Relation.Binary using (Symmetric)
 open import Dodo.Unary.Equality
 
 
+private
+  variable
+    a b ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level
+    A B C D : Set a
+
+
+-- same precedence as _≡_
 infix 4 _⊆₂'_ _⊆₂_ _⇔₂_ _⊇₂_
 
 -- | Binary relation subset helper. Generally, use `_⊆₂_` (below).
@@ -23,10 +30,7 @@ infix 4 _⊆₂'_ _⊆₂_ _⇔₂_ _⊇₂_
 -- 
 -- `x` and `y` are passed /explicitly/. If they were implicit, Agda tries (and often fails) to
 -- instantiate them at inappropriate applications.
-_⊆₂'_ : {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b}
-  → (P : REL A B ℓ₁)
-  → (R : REL A B ℓ₂)
-  → Set _
+_⊆₂'_ : REL (REL A B ℓ₁) (REL A B ℓ₂) _
 _⊆₂'_ {A = A} {B = B} P R = ∀ (x : A) (y : B) → P x y → R x y
 
 
@@ -44,7 +48,7 @@ _⊆₂'_ {A = A} {B = B} P R = ∀ (x : A) (y : B) → P x y → R x y
 -- Somehow, Agda cannot infer P and R from `P ⇒ R`, and requires them explicitly passed.
 -- For proof convenience, wrap the proof in this structure, which explicitly conveys P and R
 -- to the type-checker.
-data _⊆₂_ {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b} (P : REL A B ℓ₁) (R : REL A B ℓ₂) : Set (a ⊔ b ⊔ ℓ₁ ⊔ ℓ₂) where
+data _⊆₂_ {A : Set a} {B : Set b} (P : REL A B ℓ₁) (R : REL A B ℓ₂) : Set (a ⊔ b ⊔ ℓ₁ ⊔ ℓ₂) where
   ⊆: : P ⊆₂' R → P ⊆₂ R
 
 
@@ -62,26 +66,26 @@ data _⊆₂_ {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b} (P : REL A B �
 -- Somehow, Agda cannot infer P and R from `P ⇔ R`, and requires them explicitly passed.
 -- For proof convenience, wrap the proof in this structure, which explicitly conveys P and R
 -- to the type-checker.
-data _⇔₂_ {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b} (P : REL A B ℓ₁) (R : REL A B ℓ₂) : Set (a ⊔ b ⊔ ℓ₁ ⊔ ℓ₂) where
+data _⇔₂_ {A : Set a} {B : Set b} (P : REL A B ℓ₁) (R : REL A B ℓ₂) : Set (a ⊔ b ⊔ ℓ₁ ⊔ ℓ₂) where
   ⇔: : P ⊆₂' R → R ⊆₂' P → P ⇔₂ R
 
 
 -- | Binary relation superset
-_⊇₂_ : {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b} (P : REL A B ℓ₁) (R : REL A B ℓ₂) → Set (a ⊔ b ⊔ ℓ₁ ⊔ ℓ₂)
+_⊇₂_ : REL (REL A B ℓ₁) (REL A B ℓ₂) _
 P ⊇₂ R = R ⊆₂ P
 
 
 -- # Helpers
 
 -- | Unwraps the `⊆:` constructor
-un-⊆₂ : ∀ {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b} {P : REL A B ℓ₁} {R : REL A B ℓ₂}
+un-⊆₂ : {P : REL A B ℓ₁} {R : REL A B ℓ₂}
   → P ⊆₂ R
     -------
   → P ⊆₂' R
 un-⊆₂ (⊆: P⊆R) = P⊆R
 
 -- | Unlifts a function over `⊆₂` to its unwrapped variant over `⊆₂'`.
-unlift-⊆₂ : ∀ {a b c d ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
+unlift-⊆₂ :
     {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL C D ℓ₃} {S : REL C D ℓ₄}
   → ( P ⊆₂ Q → R ⊆₂ S )
     ---------------------
@@ -89,7 +93,7 @@ unlift-⊆₂ : ∀ {a b c d ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B
 unlift-⊆₂ f P⊆Q = un-⊆₂ (f (⊆: P⊆Q))
 
 -- | Lifts a function over `⊆₂'` to its wrapped variant over `⊆₂`.
-lift-⊆₂ : ∀ {a b c d ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
+lift-⊆₂ :
     {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL C D ℓ₃} {S : REL C D ℓ₄}
   → ( P ⊆₂' Q → R ⊆₂' S )
     ---------------------
@@ -97,8 +101,8 @@ lift-⊆₂ : ∀ {a b c d ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B :
 lift-⊆₂ f (⊆: P⊆Q) = ⊆: (f P⊆Q)
 
 -- | Introduces an equality `⇔₂` from both bi-directional components.
-⇔₂-intro : {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b}
-  → {P : REL A B ℓ₁} {R : REL A B ℓ₂}
+⇔₂-intro :
+    {P : REL A B ℓ₁} {R : REL A B ℓ₂}
   → P ⊆₂ R
   → R ⊆₂ P
     ------
@@ -106,7 +110,7 @@ lift-⊆₂ f (⊆: P⊆Q) = ⊆: (f P⊆Q)
 ⇔₂-intro (⊆: P⊆R) (⊆: R⊆P) = ⇔: P⊆R R⊆P
 
 -- | Construct an equality `⇔₂` from a mapping over both bi-directional components.
-⇔₂-compose : ∀ {a b c d ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
+⇔₂-compose :
     {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL C D ℓ₃} {S : REL C D ℓ₄}
   → ( P ⊆₂ Q → R ⊆₂ S )
   → ( Q ⊆₂ P → S ⊆₂ R )
@@ -116,7 +120,7 @@ lift-⊆₂ f (⊆: P⊆Q) = ⊆: (f P⊆Q)
 ⇔₂-compose ⊆-proof ⊇-proof (⇔: P⊆Q R⊆S) = ⇔₂-intro (⊆-proof (⊆: P⊆Q)) (⊇-proof (⊆: R⊆S))
 
 -- | Construct a /binary/ equality `⇔₂` from a mapping over both bi-directional components of a /unary/ relation.
-⇔₂-compose-⇔₁ : ∀ {a b c ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b} {C : Set c}
+⇔₂-compose-⇔₁ :
     {P : Pred A ℓ₁} {Q : Pred A ℓ₂} {R : REL B C ℓ₃} {S : REL B C ℓ₄}
   → ( P ⊆₁ Q → R ⊆₂ S )
   → ( Q ⊆₁ P → S ⊆₂ R )
@@ -126,7 +130,7 @@ lift-⊆₂ f (⊆: P⊆Q) = ⊆: (f P⊆Q)
 ⇔₂-compose-⇔₁ ⊆-proof ⊇-proof (⇔: P⊆Q R⊆S) = ⇔₂-intro (⊆-proof (⊆: P⊆Q)) (⊇-proof (⊆: R⊆S))
 
 -- | Construct a /unary/ equalty `⇔₁` from a mapping over both bi-directional components of a /binary/ relation.
-⇔₁-compose-⇔₂ : ∀ {a b c ℓ₁ ℓ₂ ℓ₃ ℓ₄ : Level} {A : Set a} {B : Set b} {C : Set c}
+⇔₁-compose-⇔₂ :
     {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : Pred C ℓ₃} {S : Pred C ℓ₄}
   → ( P ⊆₂ Q → R ⊆₁ S )
   → ( Q ⊆₂ P → S ⊆₁ R )
@@ -140,12 +144,12 @@ lift-⊆₂ f (⊆: P⊆Q) = ⊆: (f P⊆Q)
 
 -- ## Properties: ⊆₂
 
-module _ {a b ℓ : Level} {A : Set a} {B : Set b} {R : REL A B ℓ} where
+module _ {R : REL A B ℓ₁} where
 
   ⊆₂-refl : R ⊆₂ R
   ⊆₂-refl = ⊆: (λ _ _ Rxy → Rxy)
 
-module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL A B ℓ₃} where
+module _ {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL A B ℓ₃} where
     
   ⊆₂-trans : P ⊆₂ Q → Q ⊆₂ R → P ⊆₂ R
   ⊆₂-trans (⊆: P⊆Q) (⊆: Q⊆R) = ⊆: (λ x y Pxy → Q⊆R x y (P⊆Q x y Pxy))
@@ -153,12 +157,12 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b} {P : REL A B
 
 -- ## Properties: ⇔₂
 
-module _ {a b ℓ : Level} {A : Set a} {B : Set b} {R : REL A B ℓ} where
+module _ {R : REL A B ℓ₁} where
 
   ⇔₂-refl : R ⇔₂ R
   ⇔₂-refl = ⇔₂-intro ⊆₂-refl ⊆₂-refl
 
-module _ {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b} {Q : REL A B ℓ₁} {R : REL A B ℓ₂} where
+module _ {Q : REL A B ℓ₁} {R : REL A B ℓ₂} where
 
   -- | Symmetry of the `_⇔₂_` operation.
   --
@@ -169,8 +173,7 @@ module _ {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b} {Q : REL A B ℓ₁
   ⇔₂-sym : Q ⇔₂ R → R ⇔₂ Q
   ⇔₂-sym (⇔: Q⊆R R⊆Q) = ⇔: R⊆Q Q⊆R
 
-module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
-    {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL A B ℓ₃} where
+module _ {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL A B ℓ₃} where
 
   ⇔₂-trans : P ⇔₂ Q → Q ⇔₂ R → P ⇔₂ R
   ⇔₂-trans (⇔: P⊆Q Q⊆P) (⇔: Q⊆R R⊆Q) =
@@ -181,13 +184,13 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
 
 -- ## Operations: ⇔₂ and ⊆₂ conversion
 
-⇔₂-to-⊆₂ : {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b} {P : REL A B ℓ₁} {Q : REL A B ℓ₂}
+⇔₂-to-⊆₂ : {P : REL A B ℓ₁} {Q : REL A B ℓ₂}
   → P ⇔₂ Q
     ------
   → P ⊆₂ Q
 ⇔₂-to-⊆₂ (⇔: P⊆Q _) = ⊆: P⊆Q
 
-⇔₂-to-⊇₂ : {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b} {P : REL A B ℓ₁} {Q : REL A B ℓ₂}
+⇔₂-to-⊇₂ : {P : REL A B ℓ₁} {Q : REL A B ℓ₂}
   → P ⇔₂ Q
     ------
   → Q ⊆₂ P
@@ -196,7 +199,7 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
 
 -- ## Operations: ⊆₂
 
-⊆₂-apply : {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b}
+⊆₂-apply :
     {P : REL A B ℓ₁} {Q : REL A B ℓ₂}
   → P ⊆₂ Q
   → {x : A} {y : B}
@@ -206,7 +209,7 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
 ⊆₂-apply (⊆: P⊆Q) {x} {y} = P⊆Q x y
 
 -- | Substitute an equal relation (under `⇔₂`) for the left-hand side of a subset definition.
-⊆₂-substˡ : ∀ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
+⊆₂-substˡ :
     {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL A B ℓ₃}
   → P ⇔₂ Q
   → P ⊆₂ R
@@ -215,7 +218,7 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
 ⊆₂-substˡ (⇔: _ Q⊆P) P⊆R = ⊆₂-trans (⊆: Q⊆P) P⊆R
 
 -- | Substitute an equal relation (under `⇔₂`) for the right-hand side of a subset definition.
-⊆₂-substʳ : ∀ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
+⊆₂-substʳ :
     {P : REL A B ℓ₁} {Q : REL A B ℓ₂} {R : REL A B ℓ₃}
   → Q ⇔₂ R
   → P ⊆₂ Q
@@ -224,24 +227,24 @@ module _ {a b ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {B : Set b}
 ⊆₂-substʳ (⇔: Q⊆R _) P⊆Q = ⊆₂-trans P⊆Q (⊆: Q⊆R)
 
 -- | Weaken intentional equality of relations to their subset `⊆₂` definition.
-≡-to-⊆₂ : {a b ℓ : Level} {A : Set a} {B : Set b}
-    {P Q : REL A B ℓ}
+≡-to-⊆₂ :
+    {P Q : REL A B ℓ₁}
   → P ≡ Q
     ------
   → P ⊆₂ Q
 ≡-to-⊆₂ refl = ⊆: (λ _ _ Pxy → Pxy)
 
 -- | Weaken intentional equality of relations to their superset definition (inverted `⊆₂`).
-≡-to-⊇₂ : {a b ℓ : Level} {A : Set a} {B : Set b}
-    {P Q : REL A B ℓ}
+≡-to-⊇₂ :
+    {P Q : REL A B ℓ₁}
   → P ≡ Q
     ------
   → Q ⊆₂ P
 ≡-to-⊇₂ refl = ⊆: (λ _ _ Qxy → Qxy)
 
 -- | Substitute both elements of the relation's instantiation.
-subst-rel : {a b ℓ : Level} → {A : Set a} {B : Set b}
-  → (R : REL A B ℓ)
+subst-rel :
+    (R : REL A B ℓ₁)
   → {x₁ x₂ : A}
   → x₁ ≡ x₂
   → {y₁ y₂ : B}
@@ -254,7 +257,7 @@ subst-rel _ refl refl Rxy = Rxy
 
 -- ## Operations: ⇔₂
 
-⇔₂-apply-⊆₂ : {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b}
+⇔₂-apply-⊆₂ :
     {P : REL A B ℓ₁} {Q : REL A B ℓ₂}
   → P ⇔₂ Q
   → {x : A} {y : B}
@@ -263,7 +266,7 @@ subst-rel _ refl refl Rxy = Rxy
   → Q x y
 ⇔₂-apply-⊆₂ = ⊆₂-apply ∘ ⇔₂-to-⊆₂
 
-⇔₂-apply-⊇₂ : {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b}
+⇔₂-apply-⊇₂ :
     {P : REL A B ℓ₁} {Q : REL A B ℓ₂}
   → P ⇔₂ Q
   → {x : A} {y : B}
@@ -272,8 +275,8 @@ subst-rel _ refl refl Rxy = Rxy
   → P x y
 ⇔₂-apply-⊇₂ = ⊆₂-apply ∘ ⇔₂-to-⊇₂
 
-≡-to-⇔₂ : {a b ℓ : Level} {A : Set a} {B : Set b}
-    {P Q : REL A B ℓ}
+≡-to-⇔₂ :
+    {P Q : REL A B ℓ₁}
   → P ≡ Q
     ------
   → P ⇔₂ Q
@@ -299,19 +302,19 @@ subst-rel _ refl refl Rxy = Rxy
 --     P ⨾ (Q ⨾ R) ⨾ S
 --   ⊆₂∎
 -- ```
-module ⊆₂-Reasoning {a b ℓ₁ : Level} {A : Set a} {B : Set b} where
+module ⊆₂-Reasoning where
 
   infix  3 _⊆₂∎
   infixr 2 step-⊆₂
   infix  1 begin⊆₂_
 
-  begin⊆₂_ : {ℓ₂ : Level} {P : REL A B ℓ₁} {Q : REL A B ℓ₂}
+  begin⊆₂_ : {P : REL A B ℓ₁} {Q : REL A B ℓ₂}
     → P ⊆₂ Q
     → P ⊆₂ Q
   begin⊆₂_ P⊆Q = P⊆Q
 
-  step-⊆₂ : ∀ {ℓ₂ ℓ₃ : Level}
-    → (P : REL A B ℓ₁)
+  step-⊆₂ :
+      (P : REL A B ℓ₁)
     → {Q : REL A B ℓ₂}
     → {R : REL A B ℓ₃}
     → Q ⊆₂ R
@@ -342,26 +345,26 @@ module ⊆₂-Reasoning {a b ℓ₁ : Level} {A : Set a} {B : Set b} where
 --     P ⨾ (Q ⨾ R) ⨾ S
 --   ⇔₂∎
 -- ```
-module ⇔₂-Reasoning {a b ℓ₁ : Level} {A : Set a} {B : Set b} where
+module ⇔₂-Reasoning where
 
   infix  3 _⇔₂∎
   infixr 2 _⇔₂⟨⟩_ step-⇔₂
   infix  1 begin⇔₂_
 
-  begin⇔₂_ : {ℓ₂ : Level} {P : REL A B ℓ₁} {Q : REL A B ℓ₂}
+  begin⇔₂_ : {P : REL A B ℓ₁} {Q : REL A B ℓ₂}
     → P ⇔₂ Q
     → P ⇔₂ Q
   begin⇔₂_ P⇔Q = P⇔Q
 
-  _⇔₂⟨⟩_ : {ℓ₂ : Level}
+  _⇔₂⟨⟩_ :
       (P : REL A B ℓ₁)
     → {Q : REL A B ℓ₂}
     → P ⇔₂ Q
     → P ⇔₂ Q
   _ ⇔₂⟨⟩ x≡y = x≡y
 
-  step-⇔₂ : ∀ {ℓ₂ ℓ₃ : Level}
-    → (P : REL A B ℓ₁)
+  step-⇔₂ :
+      (P : REL A B ℓ₁)
     → {Q : REL A B ℓ₂}
     → {R : REL A B ℓ₃}
     → Q ⇔₂ R

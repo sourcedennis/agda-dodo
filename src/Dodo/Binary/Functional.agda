@@ -9,9 +9,15 @@ open import Relation.Binary using (Rel; REL)
 open import Dodo.Binary.Equality
 
 
+private
+  variable
+    a b ℓ₁ ℓ₂ ℓ₃ : Level
+    A B : Set a
+    
+
 -- # Definitions #
 
-Functional : ∀ {a b ℓ₁ ℓ₂ : Level} {A : Set a} {B : Set b}
+Functional : {A : Set a} {B : Set b}
   → Rel B ℓ₁
   → REL A B ℓ₂
     ---------------------
@@ -23,7 +29,6 @@ Functional _≈_ r = ∀ x y₁ y₂ → r x y₁ → r x y₂ → y₁ ≈ y₂
 
 -- # Operations #
 
-module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {≈ : Rel A ℓ₁} {P : Rel A ℓ₂} {Q : Rel A ℓ₃} where
-
-  functional-⊆₂ : P ⊆₂ Q → Functional ≈ Q → Functional ≈ P
-  functional-⊆₂ P⊆Q funcQ x y₁ y₂ Pxy₁ Pxy₂ = funcQ x y₁ y₂ (⊆₂-apply P⊆Q Pxy₁) (⊆₂-apply P⊆Q Pxy₂)
+functional-⊆₂ : {≈ : Rel A ℓ₁} {P : Rel A ℓ₂} {Q : Rel A ℓ₃}
+  → P ⊆₂ Q → Functional ≈ Q → Functional ≈ P
+functional-⊆₂ P⊆Q funcQ x y₁ y₂ Pxy₁ Pxy₂ = funcQ x y₁ y₂ (⊆₂-apply P⊆Q Pxy₁) (⊆₂-apply P⊆Q Pxy₂)

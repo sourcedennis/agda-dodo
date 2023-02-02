@@ -17,12 +17,20 @@ open import Dodo.Unary.Unique
 open import Dodo.Unary.Disjoint
 
 
+private
+  variable
+    a ℓ ℓ₁ ℓ₂ ℓ₃ : Level
+    A : Set a
+    P Q R : Pred A ℓ
+    
+
 -- # Definitions
 
-infixl 30 _∪₁_
+-- this has to bind stronger than _⇔₁_
+infixr 5 _∪₁_
 
-_∪₁_ : {a ℓ₁ ℓ₂ : Level} {A : Set a}
-  → Pred A ℓ₁
+_∪₁_ :
+    Pred A ℓ₁
   → Pred A ℓ₂
   → Pred A (ℓ₁ ⊔ ℓ₂)
 _∪₁_ p q x = p x ⊎ q x
@@ -30,7 +38,7 @@ _∪₁_ p q x = p x ⊎ q x
 
 -- # Properties
 
-module _ {a ℓ : Level} {A : Set a} {R : Pred A ℓ} where
+module _ {R : Pred A ℓ} where
 
   ∪₁-idem : (R ∪₁ R) ⇔₁ R
   ∪₁-idem = ⇔: ⊆-proof (λ _ → inj₁)
@@ -40,22 +48,20 @@ module _ {a ℓ : Level} {A : Set a} {R : Pred A ℓ} where
     ⊆-proof _ (inj₂ Rx) = Rx
 
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {Q : Pred A ℓ₂} where
-
-  ∪₁-comm : (P ∪₁ Q) ⇔₁ (Q ∪₁ P)
-  ∪₁-comm = ⇔: (λ _ → swap) (λ _ → swap)
+∪₁-comm : (P ∪₁ Q) ⇔₁ (Q ∪₁ P)
+∪₁-comm = ⇔: (λ _ → swap) (λ _ → swap)
 
 
-module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a}
-    {P : Pred A ℓ₁} {Q : Pred A ℓ₂} {R : Pred A ℓ₃} where
+module _ {P : Pred A ℓ₁} {Q : Pred A ℓ₂} {R : Pred A ℓ₃} where
 
-  ∪₁-assoc : (P ∪₁ Q) ∪₁ R ⇔₁ P ∪₁ (Q ∪₁ R)
+  ∪₁-assoc : (P ∪₁ Q) ∪₁ R  ⇔₁  P ∪₁ (Q ∪₁ R)
   ∪₁-assoc = ⇔: ⊆-proof ⊇-proof
     where
     ⊆-proof : ((P ∪₁ Q) ∪₁ R) ⊆₁' (P ∪₁ (Q ∪₁ R))
     ⊆-proof _ (inj₁ (inj₁ Px)) = inj₁ Px
     ⊆-proof _ (inj₁ (inj₂ Qx)) = inj₂ (inj₁ Qx)
     ⊆-proof _ (inj₂ Rx)        = inj₂ (inj₂ Rx)
+    
     ⊇-proof : (P ∪₁ (Q ∪₁ R)) ⊆₁' ((P ∪₁ Q) ∪₁ R)
     ⊇-proof _ (inj₁ Px)        = inj₁ (inj₁ Px)
     ⊇-proof _ (inj₂ (inj₁ Qx)) = inj₁ (inj₂ Qx)
@@ -66,23 +72,20 @@ module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a}
 
 -- ## Operations: General
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {Q : Pred A ℓ₂} where
-    
-  ∪₁-unique-pred :
-      Disjoint₁ P Q
-    → UniquePred P
-    → UniquePred Q
-    → UniquePred (P ∪₁ Q)
-  ∪₁-unique-pred _     uniqueP _       x (inj₁ Px₁) (inj₁ Px₂) = cong inj₁ (uniqueP x Px₁ Px₂)
-  ∪₁-unique-pred disPQ _       _       x (inj₁ Px)  (inj₂ Qx)  = ⊥-elim (disPQ x (Px , Qx))
-  ∪₁-unique-pred disPQ _       _       x (inj₂ Qx)  (inj₁ Px)  = ⊥-elim (disPQ x (Px , Qx))
-  ∪₁-unique-pred _     _       uniqueQ x (inj₂ Qx₁) (inj₂ Qx₂) = cong inj₂ (uniqueQ x Qx₁ Qx₂)
+∪₁-unique-pred :
+    Disjoint₁ P Q
+  → UniquePred P
+  → UniquePred Q
+  → UniquePred (P ∪₁ Q)
+∪₁-unique-pred _     uniqueP _       x (inj₁ Px₁) (inj₁ Px₂) = cong inj₁ (uniqueP x Px₁ Px₂)
+∪₁-unique-pred disPQ _       _       x (inj₁ Px)  (inj₂ Qx)  = ⊥-elim (disPQ x (Px , Qx))
+∪₁-unique-pred disPQ _       _       x (inj₂ Qx)  (inj₁ Px)  = ⊥-elim (disPQ x (Px , Qx))
+∪₁-unique-pred _     _       uniqueQ x (inj₂ Qx₁) (inj₂ Qx₂) = cong inj₂ (uniqueQ x Qx₁ Qx₂)
 
 
 -- ## Operations: ⊆₁
 
-module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a}
-    {P : Pred A ℓ₁} {Q : Pred A ℓ₂} {R : Pred A ℓ₃} where
+module _ {P : Pred A ℓ₁} {Q : Pred A ℓ₂} {R : Pred A ℓ₃} where
 
   ∪₁-combine-⊆₁ : P ⊆₁ Q → R ⊆₁ Q → (P ∪₁ R) ⊆₁ Q
   ∪₁-combine-⊆₁ (⊆: P⊆Q) (⊆: R⊆Q) = ⊆: lemma
@@ -90,35 +93,28 @@ module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a}
     lemma : (P ∪₁ R) ⊆₁' Q
     lemma x (inj₁ Px) = P⊆Q x Px
     lemma x (inj₂ Rx) = R⊆Q x Rx
-    
-
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {Q : Pred A ℓ₂} where
-
-  ∪₁-introˡ : P ⊆₁ (Q ∪₁ P)
-  ∪₁-introˡ = ⊆: λ{_ → inj₂}
-
-  ∪₁-introʳ : P ⊆₁ (P ∪₁ Q)
-  ∪₁-introʳ = ⊆: λ{_ → inj₁}
 
 
-module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a}
-    {P : Pred A ℓ₁} {Q : Pred A ℓ₂} {R : Pred A ℓ₃} where
+∪₁-introˡ : P ⊆₁ (Q ∪₁ P)
+∪₁-introˡ = ⊆: λ{_ → inj₂}
 
-  ∪₁-introˡ-⊆₁ : P ⊆₁ R → P ⊆₁ (Q ∪₁ R)
-  ∪₁-introˡ-⊆₁ (⊆: P⊆R) = ⊆: (inj₂ ∘₂ P⊆R)
+∪₁-introʳ : P ⊆₁ (P ∪₁ Q)
+∪₁-introʳ = ⊆: λ{_ → inj₁}
 
-  ∪₁-introʳ-⊆₁ : P ⊆₁ Q → P ⊆₁ (Q ∪₁ R)
-  ∪₁-introʳ-⊆₁ (⊆: P⊆Q) = ⊆: (inj₁ ∘₂ P⊆Q)
+∪₁-introˡ-⊆₁ : P ⊆₁ R → P ⊆₁ (Q ∪₁ R)
+∪₁-introˡ-⊆₁ (⊆: P⊆R) = ⊆: (inj₂ ∘₂ P⊆R)
 
-  ∪₁-elimˡ-⊆₁ : (P ∪₁ Q) ⊆₁ R → Q ⊆₁ R
-  ∪₁-elimˡ-⊆₁ (⊆: [P∪Q]⊆R) = ⊆: (λ x → [P∪Q]⊆R x ∘ inj₂)
+∪₁-introʳ-⊆₁ : P ⊆₁ Q → P ⊆₁ (Q ∪₁ R)
+∪₁-introʳ-⊆₁ (⊆: P⊆Q) = ⊆: (inj₁ ∘₂ P⊆Q)
 
-  ∪₁-elimʳ-⊆₁ : (P ∪₁ Q) ⊆₁ R → P ⊆₁ R
-  ∪₁-elimʳ-⊆₁ (⊆: [P∪Q]⊆R) = ⊆: (λ x → [P∪Q]⊆R x ∘ inj₁)
+∪₁-elimˡ-⊆₁ : (P ∪₁ Q) ⊆₁ R → Q ⊆₁ R
+∪₁-elimˡ-⊆₁ (⊆: [P∪Q]⊆R) = ⊆: (λ x → [P∪Q]⊆R x ∘ inj₂)
+
+∪₁-elimʳ-⊆₁ : (P ∪₁ Q) ⊆₁ R → P ⊆₁ R
+∪₁-elimʳ-⊆₁ (⊆: [P∪Q]⊆R) = ⊆: (λ x → [P∪Q]⊆R x ∘ inj₁)
 
 
-module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a}
-    {P : Pred A ℓ₁} {Q : Pred A ℓ₂} {R : Pred A ℓ₃} where
+module _ {P : Pred A ℓ₁} {Q : Pred A ℓ₂} {R : Pred A ℓ₃} where
 
   ∪₁-substˡ-⊆₁ : P ⊆₁ Q → (P ∪₁ R) ⊆₁ (Q ∪₁ R)
   ∪₁-substˡ-⊆₁ (⊆: P⊆Q) = ⊆: lemma
@@ -137,11 +133,8 @@ module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a}
 
 -- ## Operations: ⇔₂
 
-module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a}
-    {P : Pred A ℓ₁} {Q : Pred A ℓ₂} {R : Pred A ℓ₃} where
+∪₁-substˡ : P ⇔₁ Q → (P ∪₁ R) ⇔₁ (Q ∪₁ R)
+∪₁-substˡ = ⇔₁-compose ∪₁-substˡ-⊆₁ ∪₁-substˡ-⊆₁
 
-  ∪₁-substˡ : P ⇔₁ Q → (P ∪₁ R) ⇔₁ (Q ∪₁ R)
-  ∪₁-substˡ = ⇔₁-compose ∪₁-substˡ-⊆₁ ∪₁-substˡ-⊆₁
-
-  ∪₁-substʳ : P ⇔₁ Q → (R ∪₁ P) ⇔₁ (R ∪₁ Q)
-  ∪₁-substʳ = ⇔₁-compose ∪₁-substʳ-⊆₁ ∪₁-substʳ-⊆₁
+∪₁-substʳ : P ⇔₁ Q → (R ∪₁ P) ⇔₁ (R ∪₁ Q)
+∪₁-substʳ = ⇔₁-compose ∪₁-substʳ-⊆₁ ∪₁-substʳ-⊆₁

@@ -19,9 +19,14 @@ open import Dodo.Binary.Immediate
 open import Dodo.Binary.Filter
 
 
+private
+  variable
+    a ℓ ℓ₁ ℓ₂ : Level
+    A : Set a
+
 -- # Definitions
 
-tri-immˡ : {a ℓ₁ ℓ₂ : Level} {A : Set a} {_≈_ : Rel A ℓ₁} {R : Rel A ℓ₂}
+tri-immˡ : {_≈_ : Rel A ℓ₁} {R : Rel A ℓ₂}
   → Trichotomous _≈_ R → {x y z : A}
   → immediate R x z → immediate R y z
     ---------------------------------
@@ -32,7 +37,7 @@ tri-immˡ triR {x} {y} {z} (Rxz , ¬∃y) (Ryz , ¬∃x) with triR x y
 ... | tri> ¬Rxy x≢y  Ryx = ⊥-elim (¬∃x (x , Ryx , [ Rxz ]))
 
 
-tri-immʳ : {a ℓ₁ ℓ₂ : Level} {A : Set a} {_≈_ : Rel A ℓ₁} {R : Rel A ℓ₂}
+tri-immʳ : {_≈_ : Rel A ℓ₁} {R : Rel A ℓ₂}
   → Trichotomous _≈_ R → {x y z : A}
   → immediate R x y → immediate R x z
     ---------------------------------
@@ -43,7 +48,7 @@ tri-immʳ triR {x} {y} {z} (Rxy , ¬∃z) (Rxz , ¬∃y) with triR y z
 ... | tri> ¬Ryz y≢z  Rzy = ⊥-elim (¬∃z (z , Rxz , [ Rzy ]))
 
 
-tri-irreflexive : {a ℓ₁ ℓ₂ : Level} {A : Set a} {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂}
+tri-irreflexive : {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂}
   → Trichotomous _≈_ _<_
     --------------------
   → Irreflexive _≈_ _<_
@@ -53,7 +58,7 @@ tri-irreflexive triR {x} {y} x≈y x<y with triR x y
 ... | tri> x≮y x≉y x>y = x≉y x≈y
 
 
-tri-flip : ∀ {a ℓ : Level} {A : Set a} {R : Rel A ℓ}
+tri-flip : {R : Rel A ℓ}
   → {x y : A}
   → Tri (R x y) (x ≡ y) (R y x)
     -------------------------------------
@@ -63,7 +68,7 @@ tri-flip (tri≈ ¬Rxy x≡y ¬Ryx) = tri≈ ¬Ryx x≡y ¬Rxy
 tri-flip (tri> ¬Rxy x≢y  Ryx) = tri<  Ryx x≢y ¬Rxy
 
 
-trichotomous-flip : ∀ {a ℓ : Level} {A : Set a} {R : Rel A ℓ}
+trichotomous-flip : {R : Rel A ℓ}
   → Trichotomous _≡_ R
     -------------------------
   → Trichotomous _≡_ (flip R)

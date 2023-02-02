@@ -2,6 +2,9 @@
 
 module Dodo.Unary where
 
+
+open import Dodo.Unary.Definition public
+
 open import Dodo.Unary.Dec public
 open import Dodo.Unary.Disjoint public
 open import Dodo.Unary.Empty public

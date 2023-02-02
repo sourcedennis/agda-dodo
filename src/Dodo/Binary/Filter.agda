@@ -18,6 +18,12 @@ open import Dodo.Binary.Equality
 open import Dodo.Binary.Transitive
 
 
+private
+  variable
+    a ℓ ℓ₁ ℓ₂ ℓ₃ : Level
+    A : Set a
+
+
 -- # Definitions
 
 -- | A value of type `A` with a proof that it satisfies the given predicate `P`.
@@ -33,14 +39,14 @@ open import Dodo.Binary.Transitive
 -- This means, a relation may be defined over elements of type `WithPred`.
 -- While a relation /cannot/ be defined over elements of type `P x`, because
 -- `x` varies.
-data WithPred {a ℓ : Level} {A : Set a} (P : Pred A ℓ) : Set (a ⊔ ℓ) where
+data WithPred {A : Set a} (P : Pred A ℓ) : Set (a ⊔ ℓ) where
   with-pred : (x : A) → P x → WithPred P
 
 -- | Helper for extracting element equality from an instance of `WithPred`.
 --
 -- This is tricky to unify otherwise in larger contexts, as `Px` and `Py` have
 -- different /types/ when `x` and `y` are unequal.
-with-pred-≡ : ∀ {a ℓ : Level} {A : Set a} {P : Pred A ℓ} {x y : A} {Px : P x} {Py : P y}
+with-pred-≡ : {P : Pred A ℓ} {x y : A} {Px : P x} {Py : P y}
   → with-pred x Px ≡ with-pred y Py
     -------------------------------
   → x ≡ y
@@ -48,7 +54,7 @@ with-pred-≡ refl = refl
 
 -- | Instances of `WithPred` are equal if they are defined over the same value,
 -- and its predicate is unique.
-with-pred-unique : ∀ {a ℓ : Level} {A : Set a} {P : Pred A ℓ}
+with-pred-unique : {P : Pred A ℓ}
   → UniquePred P
   → {x y : A}
   → x ≡ y
@@ -58,7 +64,7 @@ with-pred-unique : ∀ {a ℓ : Level} {A : Set a} {P : Pred A ℓ}
 with-pred-unique uniqueP {x} refl Px Py = cong (with-pred x) (uniqueP _ Px Py)
 
 
-with-pred-≢ : ∀ {a ℓ : Level} {A : Set a} {P : Pred A ℓ}
+with-pred-≢ : {P : Pred A ℓ}
   → UniquePred P
   → {x y : A} {Px : P x} {Py : P y}
   → with-pred x Px ≢ with-pred y Py
@@ -106,8 +112,8 @@ with-pred-≢ uniqueP Px≢Py x≡y = Px≢Py (with-pred-unique uniqueP x≡y _ 
 -- > ∀ (x : A) → P x
 --
 -- Whereas (1) makes no such strong claims.
-filter-rel : ∀ {a ℓ₁ ℓ₂ : Level} {A : Set a}
-  → (P : Pred A ℓ₁)
+filter-rel :
+    (P : Pred A ℓ₁)
   → Rel A ℓ₂
     -------------------
   → Rel (WithPred P) ℓ₂
@@ -117,22 +123,22 @@ filter-rel P R (with-pred x Px) (with-pred y Py) = R x y
 --
 -- It loses the type-level restrictions, but preserves the restrictions on
 -- value-level.
-unfilter-rel : ∀ {a ℓ₁ ℓ₂ : Level} {A : Set a}
-  → {P : Pred A ℓ₁}
+unfilter-rel :
+    {P : Pred A ℓ₁}
   → Rel (WithPred P) ℓ₂
     -------------------
   → Rel A (ℓ₁ ⊔ ℓ₂)
 unfilter-rel R x y = ∃[ Px ] ∃[ Py ] R (with-pred x Px) (with-pred y Py)
 
 -- | Helper for unwrapping the value from the `with-pred` constructor.
-un-with-pred : {a ℓ : Level} {A : Set a} {P : Pred A ℓ}
+un-with-pred : {P : Pred A ℓ}
   → WithPred P
     ----------
   → A
 un-with-pred (with-pred x _) = x
 
-⁺-strip-filter : {a ℓ₁ ℓ₂ : Level} {A : Set a}
-  → {P : Pred A ℓ₁}
+⁺-strip-filter :
+    {P : Pred A ℓ₁}
   → {R : Rel A ℓ₂}
   → {x y : A}
   → {Px : P x} {Py : P y}
@@ -147,7 +153,7 @@ un-with-pred (with-pred x _) = x
 -- This applies when a predicate `P x` is true whenever `R x y` and `P y` are true.
 -- Then, for any chain where `P` holds for the final element, it holds for every
 -- element in the chain.
-⁺-filter-relˡ : {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {R : Rel A ℓ₂}
+⁺-filter-relˡ : {P : Pred A ℓ₁} {R : Rel A ℓ₂}
   → (f : ∀ {x y : A} → P y → R x y → P x)
   → {x y : A}
   → (Px : P x) (Py : P y)
@@ -162,7 +168,7 @@ un-with-pred (with-pred x _) = x
 -- This applies when a predicate `P y` is true whenever `R x y` and `P x` are true.
 -- Then, for any chain where `P` holds for the first element, it holds for every
 -- element in the chain.
-⁺-filter-relʳ : {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {R : Rel A ℓ₂}
+⁺-filter-relʳ : {P : Pred A ℓ₁} {R : Rel A ℓ₂}
   → (f : ∀ {x y : A} → P x → R x y → P y)
   → {x y : A}
   → (Px : P x) (Py : P y)
@@ -175,30 +181,25 @@ un-with-pred (with-pred x _) = x
 
 -- # Properties
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {P : Pred A ℓ₁} {Q : Pred A ℓ₂} where
+with-pred-⊆₁ : {P : Pred A ℓ₁} {Q : Pred A ℓ₂}
+  → P ⊆₁ Q
+  → WithPred P
+    ----------
+  → WithPred Q
+with-pred-⊆₁ P⊆Q (with-pred x Px) = with-pred x (⊆₁-apply P⊆Q Px)
 
-  with-pred-⊆₁ :
-      P ⊆₁ Q
-    → WithPred P
-      ----------
-    → WithPred Q
-  with-pred-⊆₁ P⊆Q (with-pred x Px) = with-pred x (⊆₁-apply P⊆Q Px)
-
-
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} where
-
-  filter-rel-⊆₂ :
-      (R : Rel A ℓ₁)
-    → {P : Pred A ℓ₂}
-      ----------------------------------
-    → unfilter-rel (filter-rel P R) ⊆₂ R
-  filter-rel-⊆₂ R {P} = ⊆: ⊆-proof
-    where
-    ⊆-proof : unfilter-rel (filter-rel P R) ⊆₂' R
-    ⊆-proof _ _ (_ , _ , Rxy) = Rxy
+filter-rel-⊆₂ :
+    (R : Rel A ℓ₁)
+  → {P : Pred A ℓ₂}
+    ----------------------------------
+  → unfilter-rel (filter-rel P R) ⊆₂ R
+filter-rel-⊆₂ R {P} = ⊆: ⊆-proof
+  where
+  ⊆-proof : unfilter-rel (filter-rel P R) ⊆₂' R
+  ⊆-proof _ _ (_ , _ , Rxy) = Rxy
 
 
-module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {P : Pred A ℓ₁} {Q : Pred A ℓ₂} {R : Rel A ℓ₃} where
+module _ {P : Pred A ℓ₁} {Q : Pred A ℓ₂} {R : Rel A ℓ₃} where
 
   filter-rel-preserves-⊆₁ :
       P ⊆₁ Q
@@ -235,7 +236,7 @@ module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {P : Pred A ℓ₁} {Q : P
     Q⇒P {with-pred _ _} {with-pred _ _} Rxy = Rxy
 
 
-module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {P : Pred A ℓ₁} {R : Rel A ℓ₂} {Q : Rel A ℓ₃} where
+module _ {P : Pred A ℓ₁} {R : Rel A ℓ₂} {Q : Rel A ℓ₃} where
 
   filter-rel-preserved-⊆₂ :
       R ⊆₂ Q
@@ -249,17 +250,16 @@ module _ {a ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set a} {P : Pred A ℓ₁} {R : R
 
 -- # Operations
 
-module _ {a ℓ₁ ℓ₂ : Level} {A : Set a} {R : Rel A ℓ₁} {P : Pred A ℓ₂} {x y : A} where
+module _ {R : Rel A ℓ₁} {P : Pred A ℓ₂} where
 
-  filter-rel-dom :
-      unfilter-rel (filter-rel P R) x y
+  filter-rel-dom : {x y : A}
+    → unfilter-rel (filter-rel P R) x y
       ---------------------------------
     → x ∈ P
   filter-rel-dom (Px , Py , Rxy) = Px
   
-  filter-rel-codom :
-      unfilter-rel (filter-rel P R) x y
+  filter-rel-codom : {x y : A}
+    → unfilter-rel (filter-rel P R) x y
       ---------------------------------
     → y ∈ P
   filter-rel-codom (Px , Py , Rxy) = Py
-  
