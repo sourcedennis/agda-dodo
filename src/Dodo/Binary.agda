@@ -23,7 +23,9 @@ open import Dodo.Binary.Irreflexive public
 open import Dodo.Binary.Maximal public
 open import Dodo.Binary.Precedes public
 open import Dodo.Binary.Product public
+open import Dodo.Binary.Reflexive public
 open import Dodo.Binary.SplittableOrder public
+open import Dodo.Binary.Star public
 open import Dodo.Binary.Subtraction public
 open import Dodo.Binary.Transitive public
 open import Dodo.Binary.Trichotomous public
