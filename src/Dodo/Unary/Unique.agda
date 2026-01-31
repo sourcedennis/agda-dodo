@@ -25,3 +25,7 @@ Unique₁ _≈_ P = ∀ {x y} → P x → P y → x ≈ y
 -- | For every `x`, there exists at most one inhabitant of `P x`.
 UniquePred : Pred A ℓ → Set _
 UniquePred P = ∀ x → Unique (P x)
+
+-- | For every `x`, there exists at most one parameter `v` for which `P v x` is true.
+UniqueProp₁ : {A : Set ℓ} → Rel A ℓ₁ → {B : Set ℓ₁} → (A → Pred B ℓ₂) → Set _
+UniqueProp₁ _≈_ f = ∀ {x} → Unique₁ _≈_ (λ v → f v x)
